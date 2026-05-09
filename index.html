@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WHOOP Health App (Web)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=DM+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .app {
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(0, 212, 160, 0.08), transparent 50%),
+        radial-gradient(ellipse at 80% 30%, rgba(167, 139, 250, 0.08), transparent 50%),
+        #0a0a0f;
+    }
+    .inner {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 22px 16px 100px;
+    }
+    .glass {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; margin-bottom: 12px;
+    }
+    .logo { font-size: 20px; font-weight: 800; letter-spacing: 4px; }
+    .status-row { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,.55); }
+    .dot { width: 7px; height: 7px; border-radius: 999px; background: #00d4a0; box-shadow: 0 0 10px #00d4a0aa; }
+    .tabs {
+      display: flex; gap: 4px; padding: 4px; margin-bottom: 12px; border-radius: 999px;
+    }
+    .tabs button {
+      flex: 1; border: none; background: transparent; color: rgba(255,255,255,.45);
+      font-size: 10px; font-weight: 700; letter-spacing: 2px; border-radius: 999px; padding: 9px 4px; cursor: pointer;
+    }
+    .tabs button.active { background: #fff; color: #0a0a0f; }
+    .hero {
+      border-radius: 24px; padding: 22px; margin-bottom: 12px; text-align: center;
+      background: linear-gradient(135deg, rgba(0, 212, 160, .2), rgba(255,255,255,.03));
+      border: 1px solid rgba(0, 212, 160, .3);
+    }
+    .hero-title { font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,.45); margin-bottom: 8px; }
+    .mono { font-family: "DM Mono", monospace; }
+    .recovery-number { font-size: 60px; line-height: 1; font-weight: 700; }
+    .recovery-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; margin-top: 4px; }
+    .sub { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 6px; }
+    .stats { display: flex; justify-content: center; gap: 18px; margin-top: 14px; }
+    .stats div { text-align: center; }
+    .stats small { display: block; font-size: 10px; color: rgba(255,255,255,.4); letter-spacing: 1px; }
+    .stats b { display: block; font-size: 15px; margin-top: 2px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .card { padding: 14px; }
+    .card .title { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,.45); margin-bottom: 8px; font-weight: 700; }
+    .card .big { font-size: 28px; font-weight: 700; }
+    .card .desc { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 2px; margin-bottom: 8px; }
+    .bar-row { display: flex; gap: 3px; align-items: end; height: 50px; }
+    .bar {
+      width: 100%;
+      border-radius: 3px 3px 0 0;
+      min-height: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .bar-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: end;
+    }
+    .bar-btn.active .bar { outline: 2px solid rgba(255,255,255,.65); outline-offset: 1px; }
+    .chart-detail {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+    }
+    .section { padding: 14px; margin-bottom: 12px; }
+    .slabel { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,.45); font-weight: 700; margin-bottom: 10px; }
+    .coach { font-size: 13px; color: rgba(255,255,255,.72); line-height: 1.6; }
+    .bottom-nav {
+      position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around;
+      background: rgba(10,10,15,.7); backdrop-filter: blur(18px); border-top: 1px solid rgba(255,255,255,.08);
+      padding: 11px 0 18px;
+    }
+    .bottom-nav button {
+      border: none; background: transparent; color: rgba(255,255,255,.35); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 9px; letter-spacing: 1px;
+      padding: 0 14px;
+    }
+    .bottom-nav button.active { color: #fff; }
+    .icon { font-size: 20px; }
+    .hidden { display: none !important; }
+    .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .row:last-child { border-bottom: none; }
+    .entry-form { display: grid; gap: 10px; }
+    .entry-form label { font-size: 11px; color: rgba(255,255,255,.7); }
+    .entry-form input {
+      width: 100%; margin-top: 4px;
+      background: rgba(255,255,255,.08); color: #fff;
+      border: 1px solid rgba(255,255,255,.18); border-radius: 10px; padding: 10px 12px;
+      font-family: "DM Mono", monospace;
+    }
+    .btn {
+      border: none; cursor: pointer; padding: 12px 14px; border-radius: 12px; font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .btn-primary { background: #fff; color: #0a0a0f; }
+    .btn-secondary { background: rgba(255,255,255,.12); color: #fff; }
+    .connect-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center;
+      padding: 24px;
+    }
+    .connect-card { max-width: 360px; padding: 24px; border-radius: 20px; }
+    .connect-card .watch { font-size: 52px; }
+    .connect-card h1 { font-size: 28px; letter-spacing: 4px; }
+    .connect-card p { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.6; margin-top: 10px; margin-bottom: 14px; }
+    .empty-state {
+      text-align: center;
+      padding: 26px 20px;
+      color: rgba(255,255,255,.65);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+    .sleep-debt-wrap {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .debt-orb {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .debt-orb::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      background: rgba(10,10,15,.9);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .debt-orb > span {
+      position: relative;
+      z-index: 1;
+      font-family: "DM Mono", monospace;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div id="connectView" class="app connect-wrap">
+    <div class="connect-card glass">
+      <div class="watch">⌚</div>
+      <h1>WHOOP</h1>
+      <div style="font-size:11px; letter-spacing:2px; color:rgba(255,255,255,.45); margin-top:4px;">FOR APPLE HEALTH (WEB DEMO)</div>
+      <p>
+        On web, direct Apple HealthKit access is not available.
+        You can still track your metrics manually and deploy this to GitHub Pages.
+      </p>
+      <button id="connectBtn" class="btn btn-primary">START APP</button>
+    </div>
+  </div>
+
+  <div id="mainView" class="app hidden">
+    <div class="inner">
+      <div class="header glass">
+        <div class="logo">WHOOP</div>
+        <div class="status-row"><span class="dot"></span><span>LOCAL MODE ACTIVE</span></div>
+      </div>
+
+      <div class="tabs glass" id="topTabs"></div>
+      <div id="content"></div>
+    </div>
+
+    <div class="bottom-nav" id="bottomNav"></div>
+  </div>
+
+  <script>
+    const NAVS = [
+      { icon: "◎", label: "RECOVERY", page: "RECOVERY" },
+      { icon: "⚡", label: "STRAIN", page: "STRAIN" },
+      { icon: "◐", label: "SLEEP", page: "SLEEP" },
+      { icon: "✎", label: "ENTRY", page: "ENTRY" },
+      { icon: "○", label: "PROFILE", page: "PROFILE" },
+    ];
+    const TABS = ["TODAY", "WEEKLY", "JOURNAL"];
+    const SLEEP_GOAL_HOURS = 8;
+    const DATA_VERSION = "2";
+
+    let state = {
+      nav: "RECOVERY",
+      tab: "TODAY",
+      connected: localStorage.getItem("whoop-web-connected") === "1",
+      data: [],
+      selectedBar: {}
+    };
+
+    function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+    function round1(v) { return Math.round(v * 10) / 10; }
+    function rColor(score) { if (score >= 67) return "#00d4a0"; if (score >= 34) return "#f5c842"; return "#ff4d6d"; }
+    function rLabel(score) { if (score >= 67) return "PEAK"; if (score >= 34) return "MODERATE"; return "LOW"; }
+    function sColor(s) { if (s >= 14) return "#ff4d6d"; if (s >= 10) return "#f5c842"; return "#4d9fff"; }
+    function fmtDate(d) { return new Date(d).toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" }); }
+    function isoToday() { return new Date().toISOString().split("T")[0]; }
+
+    function computeRecovery(hrv, rhr, sleep) {
+      const hrvScore = clamp(((hrv - 20) / 60) * 100, 0, 100);
+      const rhrScore = clamp(((80 - rhr) / 40) * 100, 0, 100);
+      const sleepScore = clamp((sleep / SLEEP_GOAL_HOURS) * 100, 0, 100);
+      return Math.round(hrvScore * 0.5 + rhrScore * 0.3 + sleepScore * 0.2);
+    }
+
+    function computeStrainFromCalories(activeCalories) {
+      return round1(clamp((activeCalories / 2200) * 21, 0, 21));
+    }
+
+    function totalCalories(entry) {
+      return round1((entry.activeCalories || 0) + (entry.restingCalories || 0));
+    }
+
+    function saveData() {
+      localStorage.setItem("whoop-web-data", JSON.stringify(state.data));
+    }
+
+    function loadData() {
+      const storedVersion = localStorage.getItem("whoop-web-data-version");
+      if (storedVersion !== DATA_VERSION) {
+        // Purge older saved/demo-compatible payloads and start fresh.
+        localStorage.removeItem("whoop-web-data");
+        localStorage.setItem("whoop-web-data-version", DATA_VERSION);
+      }
+      const raw = localStorage.getItem("whoop-web-data");
+      if (!raw) {
+        state.data = [];
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        state.data = (Array.isArray(parsed) ? parsed : []).map(normalizeEntry).sort((a, b) => a.date.localeCompare(b.date));
+      } catch (_) {
+        state.data = [];
+      }
+    }
+
+    function normalizeEntry(d) {
+      const active = Number(d.activeCalories || 0);
+      const resting = d.restingCalories != null ? Number(d.restingCalories) : 0;
+      const sleep = Number(d.sleep || 0);
+      const hrv = Number(d.hrv || 0);
+      const rhr = Number(d.rhr || 0);
+      return {
+        date: d.date || isoToday(),
+        hrv: round1(hrv),
+        rhr: round1(rhr),
+        sleep: round1(sleep),
+        activeCalories: round1(active),
+        restingCalories: round1(resting),
+        strain: round1(computeStrainFromCalories(active)),
+        recovery: computeRecovery(hrv, rhr, sleep)
+      };
+    }
+
+    function computeSleepDebtHistory(data) {
+      let debt = 0;
+      return data.map((d) => {
+        const delta = SLEEP_GOAL_HOURS - d.sleep;
+        debt = Math.max(0, round1(debt + delta));
+        return { date: d.date, delta: round1(delta), debt };
+      });
+    }
+
+    function miniBar(points, chartKey, colors, h = 60, unit = "") {
+      if (!points.length) {
+        return `<div class="empty-state">No data yet. Add entries in ENTRY tab.</div>`;
+      }
+      const max = Math.max(1, ...points.map(p => p.value));
+      const activeIdx = state.selectedBar[chartKey] ?? (points.length - 1);
+      return `
+        <div class="bar-row" style="height:${h}px">
+          ${points.map((p, i) => {
+            const height = Math.max(8, (p.value / max) * h);
+            const c = colors ? colors[i] : "#4d9fff";
+            const o = i === points.length - 1 ? 1 : 0.35 + (i / points.length) * 0.5;
+            const activeClass = i === activeIdx ? "active" : "";
+            return `
+              <button class="bar-btn ${activeClass}" data-chart="${chartKey}" data-index="${i}" title="${fmtDate(p.date)}: ${p.value}${unit}">
+                <span class="bar" style="height:${height}px;background:${c};opacity:${o}"></span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+        ${barDetail(points, chartKey, unit)}
+      `;
+    }
+
+    function barDetail(points, chartKey, unit) {
+      if (!points.length) return "";
+      const idx = state.selectedBar[chartKey] ?? (points.length - 1);
+      const point = points[Math.min(Math.max(idx, 0), points.length - 1)];
+      return `<div class="chart-detail">Selected: <b>${fmtDate(point.date)}</b> · <span class="mono">${point.value}${unit}</span></div>`;
+    }
+
+    function topTabsHTML() {
+      return TABS.map(t =>
+        `<button class="${state.tab === t ? "active" : ""}" data-top-tab="${t}">${t}</button>`
+      ).join("");
+    }
+
+    function bottomNavHTML() {
+      return NAVS.map(n => `
+        <button class="${state.nav === n.page ? "active" : ""}" data-nav="${n.page}">
+          <span class="icon">${n.icon}</span>
+          <span>${n.label}</span>
+        </button>
+      `).join("");
+    }
+
+    function emptyCard(message) {
+      return `<div class="section glass"><div class="empty-state">${message}</div></div>`;
+    }
+
+    function todayData() {
+      const sorted = [...state.data].sort((a, b) => a.date.localeCompare(b.date));
+      const today = sorted[sorted.length - 1] || null;
+      const yesterday = sorted[sorted.length - 2] || today;
+      const week = sorted.slice(-7);
+      return { today, yesterday, week, sorted };
+    }
+
+    function recoveryView() {
+      const { today, yesterday, week } = todayData();
+      if (!today) return emptyCard("Start fresh by adding your first entry in the ENTRY tab.");
+
+      const trend = today.recovery - yesterday.recovery;
+      const todayRColor = rColor(today.recovery);
+      const recoveries = week.map(d => ({ date: d.date, value: d.recovery }));
+      const strains = week.map(d => ({ date: d.date, value: d.strain }));
+      const hrvs = week.map(d => ({ date: d.date, value: d.hrv }));
+      const totalCals = week.map(d => ({ date: d.date, value: totalCalories(d) }));
+      const avgRec = Math.round(recoveries.reduce((a, b) => a + b.value, 0) / week.length);
+      const avgStr = (strains.reduce((a, b) => a + b.value, 0) / week.length).toFixed(1);
+      const avgSleep = (week.reduce((a, b) => a + b.sleep, 0) / week.length).toFixed(1);
+      const avgHRV = Math.round(hrvs.reduce((a, b) => a + b.value, 0) / week.length);
+
+      if (state.tab === "TODAY") {
+        return `
+          <div class="hero" style="background:linear-gradient(135deg, ${todayRColor}22, rgba(255,255,255,.03));border-color:${todayRColor}44">
+            <div class="hero-title">TODAY'S RECOVERY</div>
+            <div class="recovery-number mono" style="color:${todayRColor}">${today.recovery}</div>
+            <div class="recovery-label" style="color:${todayRColor}">${rLabel(today.recovery)}</div>
+            <div class="sub">${trend >= 0 ? "▲" : "▼"} ${Math.abs(trend)}% vs yesterday</div>
+            <div class="stats">
+              <div><small>HRV</small><b class="mono" style="color:${todayRColor}">${today.hrv}ms</b></div>
+              <div><small>RHR</small><b class="mono" style="color:#a78bfa">${today.rhr}bpm</b></div>
+              <div><small>SLEEP</small><b class="mono" style="color:#4d9fff">${today.sleep}h</b></div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card glass">
+              <div class="title">STRAIN</div>
+              <div class="big mono">${today.strain}<span style="font-size:12px;color:${sColor(today.strain)}"> / 21</span></div>
+              <div class="desc">Uses active calories only</div>
+              ${miniBar(strains, "today-strain", strains.map(x => sColor(x.value)), 48, "")}
+            </div>
+            <div class="card glass">
+              <div class="title">CALORIES</div>
+              <div class="big mono">${totalCalories(today)}<span style="font-size:12px;color:#f5c842"> kcal</span></div>
+              <div class="desc">Active + resting combined</div>
+              ${miniBar(totalCals, "today-calories", null, 48, " kcal")}
+            </div>
+          </div>
+
+          <div class="section glass">
+            <div class="slabel">SLEEP ANALYSIS</div>
+            <div class="row"><span style="font-size:13px;color:rgba(255,255,255,.7)">Duration</span><b class="mono">${today.sleep}h</b></div>
+            <div class="row"><span style="font-size:13px;color:rgba(255,255,255,.7)">Need</span><span class="mono" style="opacity:.65">${SLEEP_GOAL_HOURS.toFixed(1)}h</span></div>
+          </div>
+
+          <div class="section glass">
+            <div class="slabel">COACH SAYS</div>
+            <div class="coach">
+              ${today.recovery >= 67
+                ? "Your body is primed. HRV is above baseline - great day to push hard."
+                : today.recovery >= 34
+                ? "Moderate recovery. Stick to moderate intensity and prioritize sleep tonight."
+                : "Your body needs rest. Keep it light and target 8+ hours of sleep."
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.tab === "WEEKLY") {
+        return `
+          <div class="grid">
+            <div class="card glass">
+              <div class="title">AVG RECOVERY</div>
+              <div class="big mono" style="color:${rColor(avgRec)}">${avgRec}%</div>
+              <div class="desc">7-day average</div>
+            </div>
+            <div class="card glass">
+              <div class="title">AVG STRAIN</div>
+              <div class="big mono" style="color:${sColor(parseFloat(avgStr))}">${avgStr}</div>
+              <div class="desc">7-day average</div>
+            </div>
+          </div>
+
+          <div class="section glass">
+            <div class="slabel">RECOVERY - LAST 7 DAYS</div>
+            ${miniBar(recoveries, "weekly-recovery", recoveries.map(x => rColor(x.value)), 80, "%")}
+          </div>
+
+          <div class="section glass">
+            <div class="slabel">HRV TREND</div>
+            ${miniBar(hrvs, "weekly-hrv", null, 70, "ms")}
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px">
+              <span style="color:rgba(255,255,255,.45)">Baseline: ${avgHRV}ms</span>
+              <span style="color:${todayRColor}">Today: ${today.hrv}ms</span>
+            </div>
+          </div>
+
+          <div class="section glass">
+            <div class="slabel">DAILY LOG</div>
+            ${week.slice().reverse().map(d => `
+              <div class="row">
+                <div>
+                  <div style="font-size:12px;font-weight:600">${fmtDate(d.date)}</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,.45)">HRV ${d.hrv}ms · RHR ${d.rhr}bpm · ${d.sleep}h · Total kcal ${totalCalories(d)}</div>
+                </div>
+                <div class="mono" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid ${rColor(d.recovery)};color:${rColor(d.recovery)};background:${rColor(d.recovery)}22;font-weight:700">${d.recovery}</div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="section glass">
+          <div class="slabel">ABOUT YOUR METRICS</div>
+          <div style="display:grid;gap:12px">
+            <div><div style="font-size:13px;font-weight:700">Recovery Score</div><div style="font-size:12px;color:rgba(255,255,255,.52)">HRV (50%), resting heart rate (30%), sleep (20%).</div></div>
+            <div><div style="font-size:13px;font-weight:700">Strain Score</div><div style="font-size:12px;color:rgba(255,255,255,.52)">Computed from active calories only and normalized to 0-21.</div></div>
+            <div><div style="font-size:13px;font-weight:700">Calories</div><div style="font-size:12px;color:rgba(255,255,255,.52)">Recovery/overview cards use total calories = active + resting.</div></div>
+            <div><div style="font-size:13px;font-weight:700">Interactive Charts</div><div style="font-size:12px;color:rgba(255,255,255,.52)">Tap any bar to inspect exact day-level values.</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function strainView() {
+      const { today, week } = todayData();
+      if (!today) return emptyCard("No strain data yet. Add an entry with active calories.");
+      const strains = week.map(d => ({ date: d.date, value: d.strain }));
+      return `
+        <div class="hero" style="background:linear-gradient(135deg, ${sColor(today.strain)}22, rgba(255,255,255,.03));border-color:${sColor(today.strain)}44">
+          <div class="hero-title">TODAY'S STRAIN</div>
+          <div class="recovery-number mono" style="color:${sColor(today.strain)}">${today.strain}</div>
+          <div class="recovery-label" style="color:${sColor(today.strain)}">CARDIOVASCULAR LOAD</div>
+          <div class="stats">
+            <div><small>ACTIVE KCAL</small><b class="mono" style="color:#f5c842">${today.activeCalories}</b></div>
+            <div><small>MAX HR</small><b class="mono" style="color:#ff4d6d">${Math.round(today.rhr + today.strain * 5)}</b></div>
+            <div><small>AVG HR</small><b class="mono" style="color:#4d9fff">${Math.round(today.rhr + today.strain * 2)}</b></div>
+          </div>
+        </div>
+        <div class="section glass">
+          <div class="slabel">STRAIN - LAST 7 DAYS</div>
+          ${miniBar(strains, "strain-main", strains.map(x => sColor(x.value)), 80)}
+        </div>
+      `;
+    }
+
+    function sleepDebtVisual(totalDebt) {
+      const pct = clamp((totalDebt / 24) * 100, 0, 100);
+      const grad = `conic-gradient(#ff4d6d ${pct}%, rgba(255,255,255,.12) ${pct}% 100%)`;
+      const status = totalDebt === 0 ? "Debt clear. Bank stays stable." : totalDebt < 4 ? "Low debt, easy to recover." : totalDebt < 8 ? "Moderate debt, prioritize sleep." : "High debt, recovery is lagging.";
+      return `
+        <div class="sleep-debt-wrap">
+          <div class="debt-orb" style="background:${grad}">
+            <span>${totalDebt.toFixed(1)}h</span>
+          </div>
+          <div>
+            <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:700;letter-spacing:1px">TOTAL SLEEP DEBT</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;margin-top:4px">
+              Debt increases when sleep is below ${SLEEP_GOAL_HOURS}h and decreases when you sleep above target.
+            </div>
+            <div style="font-size:11px;color:#ff9db0;margin-top:6px">${status}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function sleepView() {
+      const { today, week, sorted } = todayData();
+      if (!today) return emptyCard("No sleep entries yet. Add your first sleep record in ENTRY.");
+      const score = Math.round(clamp((today.sleep / SLEEP_GOAL_HOURS) * 100, 0, 100));
+      const sleepPoints = week.map(d => ({ date: d.date, value: d.sleep }));
+      const debtHistory = computeSleepDebtHistory(sorted);
+      const totalDebt = debtHistory.length ? debtHistory[debtHistory.length - 1].debt : 0;
+      const debtPoints = debtHistory.slice(-7).map(d => ({ date: d.date, value: d.debt }));
+
+      return `
+        <div class="hero" style="background:linear-gradient(135deg, #a78bfa22, rgba(255,255,255,.03));border-color:#a78bfa44">
+          <div class="hero-title">LAST NIGHT'S SLEEP</div>
+          <div class="recovery-number mono" style="color:#a78bfa">${score}</div>
+          <div class="recovery-label" style="color:#a78bfa">SLEEP SCORE</div>
+          <div class="sub">${today.sleep}h of ${SLEEP_GOAL_HOURS}h goal</div>
+          <div class="stats">
+            <div><small>DURATION</small><b class="mono" style="color:#a78bfa">${today.sleep}h</b></div>
+            <div><small>TODAY DELTA</small><b class="mono" style="color:${today.sleep >= SLEEP_GOAL_HOURS ? "#00d4a0" : "#ff4d6d"}">${(today.sleep - SLEEP_GOAL_HOURS).toFixed(1)}h</b></div>
+            <div><small>TOTAL DEBT</small><b class="mono" style="color:#ff4d6d">${totalDebt.toFixed(1)}h</b></div>
+          </div>
+        </div>
+        <div class="section glass">
+          <div class="slabel">SLEEP DEBT ENGINE</div>
+          ${sleepDebtVisual(totalDebt)}
+        </div>
+        <div class="section glass">
+          <div class="slabel">SLEEP - LAST 7 DAYS</div>
+          ${miniBar(sleepPoints, "sleep-main", week.map(d => d.sleep >= 7 ? "#00d4a0" : d.sleep >= 6 ? "#f5c842" : "#ff4d6d"), 80, "h")}
+        </div>
+        <div class="section glass">
+          <div class="slabel">DEBT TREND - LAST 7 DAYS</div>
+          ${miniBar(debtPoints, "sleep-debt", debtPoints.map(() => "#ff4d6d"), 70, "h")}
+        </div>
+      `;
+    }
+
+    function entryView() {
+      const { today } = todayData();
+      const prefill = today || {
+        date: isoToday(),
+        hrv: 45,
+        rhr: 55,
+        sleep: 7.0,
+        activeCalories: 600,
+        restingCalories: 1600,
+        strain: computeStrainFromCalories(600)
+      };
+      return `
+        <div class="section glass">
+          <div class="slabel">DAILY METRIC ENTRY</div>
+          <form id="entryForm" class="entry-form">
+            <label>Date <input type="date" id="fDate" value="${prefill.date}" required></label>
+            <label>HRV (ms) <input type="number" id="fHRV" step="0.1" min="1" value="${prefill.hrv}" required></label>
+            <label>Resting HR (bpm) <input type="number" id="fRHR" step="0.1" min="1" value="${prefill.rhr}" required></label>
+            <label>Sleep (hours) <input type="number" id="fSleep" step="0.1" min="0" max="24" value="${prefill.sleep}" required></label>
+            <label>Active Calories (kcal) <input type="number" id="fActiveCalories" step="0.1" min="0" value="${prefill.activeCalories}" required></label>
+            <label>Resting Calories (kcal) <input type="number" id="fRestingCalories" step="0.1" min="0" value="${prefill.restingCalories}" required></label>
+            <label>Strain (0-21, auto from active kcal) <input type="number" id="fStrain" step="0.1" min="0" max="21" value="${prefill.strain}" readonly></label>
+            <label>Total Calories (active + resting) <input type="number" id="fTotalCalories" step="0.1" value="${round1(prefill.activeCalories + prefill.restingCalories)}" readonly></label>
+            <button class="btn btn-primary" type="submit">SAVE ENTRY</button>
+            <button class="btn btn-secondary" id="clearBtn" type="button">CLEAR ALL ENTRIES</button>
+          </form>
+        </div>
+        <div class="section glass">
+          <div class="slabel">HOW IT WORKS</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.58);line-height:1.6">
+            Recovery is calculated as <span class="mono">HRV 50% + RHR 30% + Sleep 20%</span>.
+            Strain uses <span class="mono">active calories only</span>.
+            Recovery cards show <span class="mono">total calories = active + resting</span>.
+          </div>
+        </div>
+      `;
+    }
+
+    function profileView() {
+      if (!state.data.length) return emptyCard("No profile baselines yet. Add at least one entry.");
+      const week = [...state.data].sort((a, b) => a.date.localeCompare(b.date)).slice(-7);
+      const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+      const avgHRV = round1(avg(week.map(x => x.hrv)));
+      const avgRHR = round1(avg(week.map(x => x.rhr)));
+      const avgSleep = round1(avg(week.map(x => x.sleep)));
+      const avgStrain = round1(avg(week.map(x => x.strain)));
+      const avgActive = round1(avg(week.map(x => x.activeCalories)));
+      const avgResting = round1(avg(week.map(x => x.restingCalories)));
+      return `
+        <div class="section glass">
+          <div class="slabel">YOUR BASELINES</div>
+          <div class="row"><span>HRV Baseline</span><b class="mono" style="color:#00d4a0">${avgHRV}ms</b></div>
+          <div class="row"><span>Resting HR Baseline</span><b class="mono" style="color:#ff4d6d">${avgRHR}bpm</b></div>
+          <div class="row"><span>Avg Sleep</span><b class="mono" style="color:#a78bfa">${avgSleep}h</b></div>
+          <div class="row"><span>Avg Strain</span><b class="mono" style="color:#4d9fff">${avgStrain}/21</b></div>
+          <div class="row"><span>Avg Active Calories</span><b class="mono" style="color:#f5c842">${avgActive}</b></div>
+          <div class="row"><span>Avg Resting Calories</span><b class="mono" style="color:#9ad0ff">${avgResting}</b></div>
+        </div>
+      `;
+    }
+
+    function attachChartHandlers() {
+      document.querySelectorAll(".bar-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const chart = btn.dataset.chart;
+          const index = Number(btn.dataset.index);
+          state.selectedBar[chart] = index;
+          render();
+        });
+      });
+    }
+
+    function renderContent() {
+      const root = document.getElementById("content");
+      if (state.nav === "RECOVERY") root.innerHTML = recoveryView();
+      else if (state.nav === "STRAIN") root.innerHTML = strainView();
+      else if (state.nav === "SLEEP") root.innerHTML = sleepView();
+      else if (state.nav === "ENTRY") root.innerHTML = entryView();
+      else root.innerHTML = profileView();
+
+      attachChartHandlers();
+
+      if (state.nav === "ENTRY") {
+        document.getElementById("entryForm").addEventListener("submit", onEntrySubmit);
+        const activeInput = document.getElementById("fActiveCalories");
+        const restingInput = document.getElementById("fRestingCalories");
+        const strainInput = document.getElementById("fStrain");
+        const totalInput = document.getElementById("fTotalCalories");
+        const recalc = () => {
+          const active = Number(activeInput.value || 0);
+          const resting = Number(restingInput.value || 0);
+          strainInput.value = computeStrainFromCalories(active).toFixed(1);
+          totalInput.value = round1(active + resting).toFixed(1);
+        };
+        activeInput.addEventListener("input", recalc);
+        restingInput.addEventListener("input", recalc);
+        recalc();
+        document.getElementById("clearBtn").addEventListener("click", () => {
+          state.data = [];
+          state.selectedBar = {};
+          localStorage.removeItem("whoop-web-data");
+          render();
+        });
+      }
+    }
+
+    function onEntrySubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById("fDate").value;
+      const hrv = Number(document.getElementById("fHRV").value);
+      const rhr = Number(document.getElementById("fRHR").value);
+      const sleep = Number(document.getElementById("fSleep").value);
+      const activeCalories = Number(document.getElementById("fActiveCalories").value);
+      const restingCalories = Number(document.getElementById("fRestingCalories").value);
+      const strain = computeStrainFromCalories(activeCalories);
+      const recovery = computeRecovery(hrv, rhr, sleep);
+
+      const entry = {
+        date,
+        hrv: round1(hrv),
+        rhr: round1(rhr),
+        sleep: round1(sleep),
+        activeCalories: round1(activeCalories),
+        restingCalories: round1(restingCalories),
+        strain: round1(strain),
+        recovery
+      };
+
+      const existingIndex = state.data.findIndex(d => d.date === date);
+      if (existingIndex >= 0) state.data[existingIndex] = entry;
+      else state.data.push(entry);
+
+      state.data.sort((a, b) => a.date.localeCompare(b.date));
+      saveData();
+      state.nav = "RECOVERY";
+      state.tab = "TODAY";
+      render();
+    }
+
+    function render() {
+      const connectView = document.getElementById("connectView");
+      const mainView = document.getElementById("mainView");
+
+      connectView.classList.toggle("hidden", state.connected);
+      mainView.classList.toggle("hidden", !state.connected);
+      if (!state.connected) return;
+
+      const topTabs = document.getElementById("topTabs");
+      const bottomNav = document.getElementById("bottomNav");
+
+      topTabs.innerHTML = topTabsHTML();
+      bottomNav.innerHTML = bottomNavHTML();
+      topTabs.style.display = state.nav === "RECOVERY" ? "flex" : "none";
+      renderContent();
+
+      topTabs.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.tab = btn.dataset.topTab;
+          render();
+        });
+      });
+      bottomNav.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.nav = btn.dataset.nav;
+          render();
+        });
+      });
+    }
+
+    document.getElementById("connectBtn").addEventListener("click", () => {
+      state.connected = true;
+      localStorage.setItem("whoop-web-connected", "1");
+      render();
+    });
+
+    loadData();
+    render();
+  </script>
+</body>
+</html>
